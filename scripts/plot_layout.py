@@ -5,8 +5,8 @@ Usage: python3 scripts/plot_layout.py <layout_file> -o <picture.png>
                                       [-r <result_file>] [-c <regions_file>] [-t <title>]
   -r  result file (./eol_drc output): violations are drawn in red as V1, V2, ...
   -c  regions file (./eol_drc --regions output): for every EOL edge, the edge itself,
-      the two parallel regions (filled when a shape was found there) and the spacing
-      window in front of the edge (only when the parallel condition holds)
+      the two parallel regions (filled when a shape was found there) and the T-shaped
+      violation region in front of the edge (only when the parallel condition holds)
 The output format follows the extension of -o (.png / .svg / .pdf).
 Rectangles are labelled #1, #2, ... in input order.
 """
@@ -180,11 +180,12 @@ def main():
             Patch(facecolor=SIDE_COLOR, alpha=0.35, edgecolor=SIDE_COLOR, linestyle="--",
                   label="parallel region,\nshape found -> rule applies"),
             Patch(facecolor=FRONT_COLOR, alpha=0.15, edgecolor=FRONT_COLOR, linestyle="--",
-                  label="spacing window 1.0\n(checked only if rule applies)"),
+                  label="violation region (T shape):\n1.0 deep, 0.4 wider on each side\n"
+                        "(checked only if rule applies)"),
         ]
     if marks is not None:
         legend.append(Patch(facecolor="red", alpha=0.5, edgecolor="red", hatch="////",
-                            label="violation (spacing < 1.0)"))
+                            label="violation: a shape inside\nthe violation region"))
 
     fig.canvas.draw()  # fix the axes box so label extents can be measured
     renderer = fig.canvas.get_renderer()

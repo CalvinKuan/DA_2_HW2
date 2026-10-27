@@ -25,8 +25,11 @@
 //    3. Parallel check: the rule applies only if some rect reaches into the
 //       side regions [xa - parSpace, xa) or (xb, xb + parSpace] while
 //       overlapping [Y - parWithin, Y].
-//    4. Spacing check: every rect whose bottom lies in [Y, Y + eolSpace) and
-//       which overlaps (xa, xb) violates; marker = the box between them.
+//    4. Violation region (the T shape of Fig. 2a):
+//         [xa - eolWithin, xb + eolWithin] x [Y, Y + eolSpace].
+//       Every rect whose interior overlaps it violates; a rect only touching
+//       its border does not (spacing == eolSpace is legal). The marker is the
+//       part of the region between the edge level Y and the rect.
 // ============================================================================
 
 namespace {
@@ -161,19 +164,21 @@ void checkUpEdges(const std::vector<Shape>& shapes, const EolRule& rule, int lay
         });
         const bool parallel = sideHit[0] || sideHit[1];
 
-        // 4. spacing in front of the edge
-        const Coord wl = xa - rule.eolWithin, wh = xb + rule.eolWithin;
+        // 4. violation region in front of the edge, eolWithin wider on both sides (T shape)
+        const Coord wl = xa - rule.eolWithin, wh = xb + rule.eolWithin, top = Y + rule.eolSpace;
         const size_t before = out.size();
         if (parallel) {
-            index.query(wl, Y, wh, Y + rule.eolSpace, [&](const Shape& s) {
-                if (s.yl < Y || s.yl >= Y + rule.eolSpace) return;
-                if (std::min(s.xh, wh) <= std::max(s.xl, wl)) return;
+            index.query(wl, Y, wh, top, [&](const Shape& s) {
+                // interiors must overlap; only touching the border is legal
+                if (s.xh <= wl || s.xl >= wh || s.yh <= Y || s.yl >= top) return;
                 Violation v;
                 v.layer = layer;
                 v.dir = kDir[k];
                 v.eolEdge = rotateSegment({xa, Y, xb, Y}, back);
-                v.spacing = s.yl - Y;
-                v.marker = rotateBox({std::max(s.xl, wl), Y, std::min(s.xh, wh), s.yl}, back);
+                v.spacing = std::max({Coord(0), s.yl - Y, s.xl - xb, xa - s.xh});
+                // in front: the gap up to the shape; beside the edge: the part of the shape inside
+                const Coord mTop = s.yl > Y ? s.yl : std::min(s.yh, top);
+                v.marker = rotateBox({std::max(s.xl, wl), Y, std::min(s.xh, wh), mTop}, back);
                 v.eolRectId = r.id;
                 v.otherRectId = s.id;
                 out.push_back(v);
@@ -189,7 +194,7 @@ void checkUpEdges(const std::vector<Shape>& shapes, const EolRule& rule, int lay
             c.side[1] = rotateBox({xb, Y - rule.parWithin, xb + rule.parSpace, Y}, back);
             c.sideHit[0] = sideHit[0];
             c.sideHit[1] = sideHit[1];
-            c.front = rotateBox({wl, Y, wh, Y + rule.eolSpace}, back);
+            c.front = rotateBox({wl, Y, wh, top}, back);
             c.applies = parallel;
             c.violated = out.size() > before;
             checks->push_back(c);

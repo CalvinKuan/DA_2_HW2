@@ -33,7 +33,8 @@ struct EolCheck {
     Dir dir = Dir::Up;
     Box side[2];                       // parallel regions beside the edge (parSpace x parWithin)
     bool sideHit[2] = {false, false};  // a shape was found in side[i]
-    Box front;                         // spacing window in front of the edge (edge length x eolSpace)
+    Box front;                         // T-shaped violation region in front of the edge
+                                       // ((edge length + 2 * eolWithin) x eolSpace)
     bool applies = false;              // parallel condition holds, so the front window was checked
     bool violated = false;             // a shape was found in the front window
 };
