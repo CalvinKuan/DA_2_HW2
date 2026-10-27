@@ -35,7 +35,7 @@ for in in "$IN_DIR"/*.txt; do
     exp="$EXP_DIR/$name.out"
     rm -f "$out"
 
-    { time "$BIN" "$in" "$out" > "$log" 2>&1; echo $? > "$OUT_DIR/.rc"; } 2> "$OUT_DIR/.time"
+    { time "$BIN" "$in" "$out" --regions "$OUT_DIR/$name.regions" > "$log" 2>&1; echo $? > "$OUT_DIR/.rc"; } 2> "$OUT_DIR/.time"
     rc="$(cat "$OUT_DIR/.rc")"
     sec="$(tail -n 1 "$OUT_DIR/.time")"
 

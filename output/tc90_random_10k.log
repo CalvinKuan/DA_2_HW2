@@ -1354,4 +1354,4 @@ EOL violations: 1282 (checkEOL returned 1354 before dedup)
   #1352 layer 1: EOL edge (94.900, 232.000)-(94.900, 232.600) facing left, spacing 0.800 um, marker (94.100, 232.000)-(94.900, 232.600), eol rect #9921, other rect #8112
   #1353 layer 1: EOL edge (72.500, 6.300)-(72.500, 6.700) facing left, spacing 0.700 um, marker (71.800, 6.300)-(72.500, 6.700), eol rect #9994, other rect #4916
   #1354 layer 1: EOL edge (223.600, 39.000)-(223.600, 39.600) facing left, spacing 0.100 um, marker (223.500, 39.300)-(223.600, 39.600), eol rect #9997, other rect #7647
-Parse time: 3.75346 ms, check time: 5.74742 ms
+Parse time: 3.87179 ms, check time: 5.91587 ms

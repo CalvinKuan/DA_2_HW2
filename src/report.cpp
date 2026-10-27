@@ -59,3 +59,25 @@ void printDetails(std::ostream& out, const std::vector<Violation>& violations) {
         out << "\n";
     }
 }
+
+void writeChecks(std::ostream& out, const std::vector<EolCheck>& checks) {
+    auto box = [&](const Box& b) {
+        out << um(b.xl) << " " << um(b.yl) << " " << um(b.xh) << " " << um(b.yh);
+    };
+    auto yesNo = [](bool b) { return b ? "yes" : "no"; };
+
+    out << "number_of_eol_edges " << checks.size() << "\n";
+    for (const EolCheck& c : checks) {
+        out << c.layer << " " << dirName(c.dir) << "  edge " << um(c.eolEdge.x1) << " "
+            << um(c.eolEdge.y1) << " " << um(c.eolEdge.x2) << " " << um(c.eolEdge.y2);
+        for (int i = 0; i < 2; ++i) {
+            out << "  side ";
+            box(c.side[i]);
+            out << " " << yesNo(c.sideHit[i]);
+        }
+        out << "  front ";
+        box(c.front);
+        out << "  applies " << yesNo(c.applies) << "  violation " << yesNo(c.violated) << "\n";
+    }
+    out << "end_of_eol_edges\n";
+}

@@ -15,3 +15,8 @@ size_t writeViolations(std::ostream& out, const std::vector<Violation>& violatio
 
 // Human-readable details of every violation (for debugging / the report).
 void printDetails(std::ostream& out, const std::vector<Violation>& violations);
+
+// Writes every checked EOL edge and the regions looked at, one per line:
+//   <layer> <dir>  edge x1 y1 x2 y2  side xl yl xh yh <hit>  side xl yl xh yh <hit>
+//   front xl yl xh yh  applies <yes|no>  violation <yes|no>
+void writeChecks(std::ostream& out, const std::vector<EolCheck>& checks);

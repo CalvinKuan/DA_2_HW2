@@ -26,5 +26,19 @@ struct Violation {
     int otherRectId = -1;  // optional: offending input rect
 };
 
+// One EOL edge that was checked, with the regions that were looked at (for drawing / debugging).
+struct EolCheck {
+    int layer = 0;
+    Segment eolEdge;
+    Dir dir = Dir::Up;
+    Box side[2];                       // parallel regions beside the edge (parSpace x parWithin)
+    bool sideHit[2] = {false, false};  // a shape was found in side[i]
+    Box front;                         // spacing window in front of the edge (edge length x eolSpace)
+    bool applies = false;              // parallel condition holds, so the front window was checked
+    bool violated = false;             // a shape was found in the front window
+};
+
 // Checks the EOL rule on every layer and returns all violations.
-std::vector<Violation> checkEOL(const Layout& layout, const EolRule& rule);
+// If `checks` is not null, every EOL edge found is also recorded there.
+std::vector<Violation> checkEOL(const Layout& layout, const EolRule& rule,
+                                std::vector<EolCheck>* checks = nullptr);

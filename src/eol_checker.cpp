@@ -120,7 +120,7 @@ private:
 // Checks all EOL edges facing up (+y) among `shapes` (all on one layer).
 // `k` is the rotation applied to the shapes; results are rotated back.
 void checkUpEdges(const std::vector<Shape>& shapes, const EolRule& rule, int layer, int k,
-                  std::vector<Violation>& out) {
+                  std::vector<Violation>& out, std::vector<EolCheck>* checks) {
     static const Dir kDir[4] = {Dir::Up, Dir::Right, Dir::Down, Dir::Left};
     const int back = (4 - k) % 4;
 
@@ -153,41 +153,61 @@ void checkUpEdges(const std::vector<Shape>& shapes, const EolRule& rule, int lay
         if (covered || !seen.emplace(Y, xa, xb).second) continue;
 
         // 3. parallel edge: the query box already limits the distance to parSpace / parWithin,
-        //    so the shape only has to stick out beyond either side of the edge
-        bool parallel = false;
+        //    so the shape only has to stick out beyond the left or right side of the edge
+        bool sideHit[2] = {false, false};
         index.query(xa - rule.parSpace, Y - rule.parWithin, xb + rule.parSpace, Y, [&](const Shape& s) {
-            if (s.xl < xa || s.xh > xb) parallel = true;
+            if (s.xl < xa) sideHit[0] = true;
+            if (s.xh > xb) sideHit[1] = true;
         });
-        if (!parallel) continue;
+        const bool parallel = sideHit[0] || sideHit[1];
 
         // 4. spacing in front of the edge
         const Coord wl = xa - rule.eolWithin, wh = xb + rule.eolWithin;
-        index.query(wl, Y, wh, Y + rule.eolSpace, [&](const Shape& s) {
-            if (s.yl < Y || s.yl >= Y + rule.eolSpace) return;
-            if (std::min(s.xh, wh) <= std::max(s.xl, wl)) return;
-            Violation v;
-            v.layer = layer;
-            v.dir = kDir[k];
-            v.eolEdge = rotateSegment({xa, Y, xb, Y}, back);
-            v.spacing = s.yl - Y;
-            v.marker = rotateBox({std::max(s.xl, wl), Y, std::min(s.xh, wh), s.yl}, back);
-            v.eolRectId = r.id;
-            v.otherRectId = s.id;
-            out.push_back(v);
-        });
+        const size_t before = out.size();
+        if (parallel) {
+            index.query(wl, Y, wh, Y + rule.eolSpace, [&](const Shape& s) {
+                if (s.yl < Y || s.yl >= Y + rule.eolSpace) return;
+                if (std::min(s.xh, wh) <= std::max(s.xl, wl)) return;
+                Violation v;
+                v.layer = layer;
+                v.dir = kDir[k];
+                v.eolEdge = rotateSegment({xa, Y, xb, Y}, back);
+                v.spacing = s.yl - Y;
+                v.marker = rotateBox({std::max(s.xl, wl), Y, std::min(s.xh, wh), s.yl}, back);
+                v.eolRectId = r.id;
+                v.otherRectId = s.id;
+                out.push_back(v);
+            });
+        }
+
+        if (checks) {
+            EolCheck c;
+            c.layer = layer;
+            c.dir = kDir[k];
+            c.eolEdge = rotateSegment({xa, Y, xb, Y}, back);
+            c.side[0] = rotateBox({xa - rule.parSpace, Y - rule.parWithin, xa, Y}, back);
+            c.side[1] = rotateBox({xb, Y - rule.parWithin, xb + rule.parSpace, Y}, back);
+            c.sideHit[0] = sideHit[0];
+            c.sideHit[1] = sideHit[1];
+            c.front = rotateBox({wl, Y, wh, Y + rule.eolSpace}, back);
+            c.applies = parallel;
+            c.violated = out.size() > before;
+            checks->push_back(c);
+        }
     }
 }
 
 }  // namespace
 
-std::vector<Violation> checkEOL(const Layout& layout, const EolRule& rule) {
+std::vector<Violation> checkEOL(const Layout& layout, const EolRule& rule,
+                                std::vector<EolCheck>* checks) {
     std::vector<Violation> violations;
     for (const auto& [layer, rects] : layout.rectsByLayer()) {
         for (int k = 0; k < 4; ++k) {
             std::vector<Shape> shapes;
             shapes.reserve(rects.size());
             for (const Rect& r : rects) shapes.push_back(rotate({r.xl, r.yl, r.xh, r.yh, r.id}, k));
-            checkUpEdges(shapes, rule, layer, k, violations);
+            checkUpEdges(shapes, rule, layer, k, violations, checks);
         }
     }
     return violations;

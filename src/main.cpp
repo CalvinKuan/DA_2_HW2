@@ -8,10 +8,33 @@
 #include "layout.h"
 #include "report.h"
 
+namespace {
+
+void usage(const char* prog) {
+    std::cerr << "Usage: " << prog << " <layout_file> [result_file] [--regions <regions_file>]\n"
+              << "  result_file   defaults to stdout\n"
+              << "  --regions     also write every checked EOL edge and the regions looked at\n";
+}
+
+}  // namespace
+
 int main(int argc, char** argv) {
-    if (argc < 2 || argc > 3) {
-        std::cerr << "Usage: " << argv[0] << " <layout_file> [result_file]\n"
-                  << "  result_file defaults to stdout\n";
+    std::string inPath, outPath, regionsPath;
+    for (int i = 1; i < argc; ++i) {
+        std::string a = argv[i];
+        if (a == "--regions" && i + 1 < argc) {
+            regionsPath = argv[++i];
+        } else if (inPath.empty()) {
+            inPath = a;
+        } else if (outPath.empty()) {
+            outPath = a;
+        } else {
+            usage(argv[0]);
+            return 1;
+        }
+    }
+    if (inPath.empty()) {
+        usage(argv[0]);
         return 1;
     }
 
@@ -19,20 +42,30 @@ int main(int argc, char** argv) {
 
     Layout layout;
     std::string err;
-    if (!parseLayout(argv[1], layout, err)) {
+    if (!parseLayout(inPath, layout, err)) {
         std::cerr << "Parse error: " << err << "\n";
         return 1;
     }
     auto t1 = std::chrono::steady_clock::now();
 
     EolRule rule;
-    std::vector<Violation> violations = checkEOL(layout, rule);
+    std::vector<EolCheck> checks;
+    std::vector<Violation> violations = checkEOL(layout, rule, regionsPath.empty() ? nullptr : &checks);
     auto t2 = std::chrono::steady_clock::now();
 
-    if (argc == 3) {
-        std::ofstream fout(argv[2]);
+    if (!regionsPath.empty()) {
+        std::ofstream frg(regionsPath);
+        if (!frg) {
+            std::cerr << "Cannot write " << regionsPath << "\n";
+            return 1;
+        }
+        writeChecks(frg, checks);
+    }
+
+    if (!outPath.empty()) {
+        std::ofstream fout(outPath);
         if (!fout) {
-            std::cerr << "Cannot write " << argv[2] << "\n";
+            std::cerr << "Cannot write " << outPath << "\n";
             return 1;
         }
         size_t written = writeViolations(fout, violations);

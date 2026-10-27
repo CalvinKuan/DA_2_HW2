@@ -25,16 +25,27 @@ inside #1).
 
 ![tc07 input](docs/tc07_input.png)
 
-Output: two violations, drawn in red.
+Output: the regions the checker looked at and the two violations.
 
 ![tc07 output](docs/tc07_output.png)
 
-- **V1**: the top end of wire #1 (width 0.6) is 0.5 um below #2, and #3 is beside it.
-  The duplicated rectangle #4 and the inner rectangle #5 do not create extra violations.
-- **Middle group**: #7 lies completely inside block #6, so it has no edge of its own and
-  nothing is reported.
-- **V2**: in the hook shape, the top end of #8 faces #11, another part of the same metal,
-  only 0.5 um away. #12 is beside it.
+- **Orange line**: an EOL edge (an end of the merged metal, length <= 0.6).
+- **Green dashed boxes**: the parallel regions (0.4 x 0.7) beside each EOL edge. A filled
+  box means a shape was found there, so the rule applies to that edge.
+- **Purple dashed box**: the 1.0 spacing window in front of the edge. It is only checked
+  when the rule applies.
+- **Red hatched box**: a real violation: a shape inside the spacing window.
+
+What happens in tc07:
+
+- **V1**: the top end of wire #1 (width 0.6) has #3 in its right parallel region, and #2
+  is only 0.5 um in front of it. The duplicated rectangle #4 and the inner rectangle #5 do
+  not create extra edges. The bottom end of #1 is checked too, but its window is empty.
+- **Middle group**: #7 lies completely inside block #6, so there is no EOL edge at all.
+- **V2**: in the hook shape, the top end of #8 has #12 in its right parallel region, and
+  #11, another part of the same metal, is only 0.5 um in front of it.
+
+Pictures like this for every testcase: `make test && make figures`, then open `output/<name>.png`.
 
 ## Directory
 
@@ -55,8 +66,8 @@ Output: two violations, drawn in red.
 ├── docs/                 pictures used in this README
 └── scripts/
     ├── run_tests.sh      runs all testcases and compares with expected results
-    ├── plot_layout.py    draws a layout + violation markers (needs matplotlib)
-    └── make_figures.sh   draws every testcase into testcases/figures/
+    ├── plot_layout.py    draws a layout, violation markers and checked regions (needs matplotlib)
+    └── make_figures.sh   draws every testcase into testcases/figures/ (and output/ after make test)
 ```
 
 ## Compile
@@ -70,7 +81,7 @@ make
 ## Run
 
 ```bash
-./eol_drc <layout_file> [result_file]
+./eol_drc <layout_file> [result_file] [--regions <regions_file>]
 
 # e.g. the layout given in the spec
 mkdir -p output
@@ -79,6 +90,10 @@ mkdir -p output
 
 If `result_file` is given, the result is written there and a summary (with details of each
 violation) is printed to stdout. Otherwise the result is printed to stdout.
+
+`--regions` also writes every EOL edge found and the regions checked for it (the two
+parallel regions, whether a shape was found in each, the spacing window, and whether it
+was violated). `scripts/plot_layout.py -c` draws this file.
 
 Run all testcases:
 

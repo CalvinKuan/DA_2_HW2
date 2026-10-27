@@ -2,7 +2,8 @@
 # Draw every testcase into testcases/figures/:
 #   <name>_input.png      the input layout
 #   <name>_expected.png   the expected violations (if testcases/expected/<name>.out exists)
-# If your program's result output/<name>.out exists, it is drawn to output/<name>.png as well.
+# If the program's result output/<name>.out exists (run `make test` first), it is drawn to
+# output/<name>.png as well, together with the regions checked (output/<name>.regions).
 # Usage: scripts/make_figures.sh [name-filter]
 set -eu
 
@@ -26,8 +27,12 @@ for in in "$ROOT"/testcases/inputs/*.txt; do
     fi
 
     out="$ROOT/output/$name.out"
+    regions="$ROOT/output/$name.regions"
     if [[ -f "$out" ]]; then
-        python3 "$PLOT" "$in" -r "$out" -o "$ROOT/output/$name.png" -t "$name - your result"
+        extra=()
+        if [[ -f "$regions" ]]; then extra=(-c "$regions"); fi
+        python3 "$PLOT" "$in" -r "$out" ${extra[@]+"${extra[@]}"} -o "$ROOT/output/$name.png" \
+            -t "$name - output of ./eol_drc"
         echo "output/$name.png"
     fi
 done
