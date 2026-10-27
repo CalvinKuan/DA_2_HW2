@@ -1,0 +1,4 @@
+Layers: 1, rectangles: 3
+EOL violations: 1 (checkEOL returned 1 before dedup)
+  #1 layer 1: EOL edge (3.000, 4.000)-(3.600, 4.000) facing up, spacing 0.500 um, marker (3.000, 4.000)-(3.600, 4.500), eol rect #1, other rect #2
+Parse time: 0.182916 ms, check time: 0.005459 ms
