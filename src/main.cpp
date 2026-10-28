@@ -76,10 +76,8 @@ int main(int argc, char** argv) {
         };
         std::cout << "Layers: " << layout.layers.size() << ", rectangles: " << layout.rects.size()
                   << "\n";
-        std::cout << "EOL violations: " << written << " (checkEOL returned " << violations.size()
-                  << " before dedup)\n";
+        std::cout << "EOL violations: " << written << "\n";
         printDetails(std::cout, violations);
-        printNotApplied(std::cout, checks);
         std::cout << "Parse time: " << ms(t0, t1) << " ms, check time: " << ms(t1, t2) << " ms\n";
     } else {
         writeViolations(std::cout, violations);

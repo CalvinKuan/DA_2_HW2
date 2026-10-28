@@ -34,8 +34,9 @@ size_t writeViolations(std::ostream& out, const std::vector<Violation>& violatio
     std::vector<Key> keys;
     keys.reserve(violations.size());
     for (const Violation& v : violations) keys.push_back(keyOf(v));
+    // no deduplication: two line ends facing each other can give the same marker twice,
+    // and each of them is a violation
     std::sort(keys.begin(), keys.end());
-    keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
 
     out << "number_of_violations " << keys.size() << "\n";
     for (const Key& k : keys) {
@@ -60,18 +61,6 @@ void printDetails(std::ostream& out, const std::vector<Violation>& violations) {
     }
 }
 
-void printNotApplied(std::ostream& out, const std::vector<EolCheck>& checks) {
-    size_t n = 0;
-    for (const EolCheck& c : checks) n += c.frontHit && !c.applies;
-    out << "Metal too close in front but nothing beside the end (not a violation): " << n << "\n";
-    for (const EolCheck& c : checks) {
-        if (!c.frontHit || c.applies) continue;
-        out << "  layer " << c.layer << ": EOL edge (" << um(c.eolEdge.x1) << ", "
-            << um(c.eolEdge.y1) << ")-(" << um(c.eolEdge.x2) << ", " << um(c.eolEdge.y2)
-            << ") facing " << dirName(c.dir) << ", spacing " << um(c.frontSpacing) << " um\n";
-    }
-}
-
 void writeChecks(std::ostream& out, const std::vector<EolCheck>& checks) {
     auto box = [&](const Box& b) {
         out << um(b.xl) << " " << um(b.yl) << " " << um(b.xh) << " " << um(b.yh);
@@ -82,15 +71,9 @@ void writeChecks(std::ostream& out, const std::vector<EolCheck>& checks) {
     for (const EolCheck& c : checks) {
         out << c.layer << " " << dirName(c.dir) << "  edge " << um(c.eolEdge.x1) << " "
             << um(c.eolEdge.y1) << " " << um(c.eolEdge.x2) << " " << um(c.eolEdge.y2);
-        for (int i = 0; i < 2; ++i) {
-            out << "  side ";
-            box(c.side[i]);
-            out << " " << yesNo(c.sideHit[i]);
-        }
         out << "  front ";
         box(c.front);
-        out << "  applies " << yesNo(c.applies) << "  metal_in_front " << yesNo(c.frontHit)
-            << "  violation " << yesNo(c.violated) << "\n";
+        out << "  violation " << yesNo(c.violated) << "\n";
     }
     out << "end_of_eol_edges\n";
 }

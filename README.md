@@ -23,11 +23,15 @@ Result for the layout given in the spec: one violation per line, as `layer  x1 y
 (lower-left and upper-right corner, um).
 
 ```
-number_of_violations 2
+number_of_violations 3
+1  6.100 1.000,  7.000 1.600
 1  6.100 1.000,  7.000 1.600
 1  10.000 1.800,  11.400 2.200
 end_of_violation
 ```
+
+The first two lines are the same gap seen from both line ends (#2 and #4 face each other),
+so they are two violations.
 
 ## Example (tc07)
 
@@ -40,7 +44,6 @@ Output with the regions the checker looked at:
 ![tc07 output](docs/tc07_output.png)
 
 - **Orange line**: EOL edge.
-- **Green box**: parallel region (checked). Filled means metal was found there.
 - **Purple box**: EOL spacing region in front of the edge (checked): EOLSpacing 1.0 deep,
   EOLWithin 0.4 wider on each side.
 - **Red box**: violation.
@@ -52,18 +55,19 @@ Rule parameters (`src/eol_rule.h`):
 | Parameter | Value |
 |---|---|
 | EOL edge length (length of end) | <= 0.6 um |
-| Parallel length | 0.7 um |
-| Parallel halo | 0.4 um |
 | EOLSpacing: depth of the EOL spacing region | 1.0 um |
 | EOLWithin ("halo"): extra width of the EOL spacing region on each side | 0.4 um (assumed; no value in the spec) |
+
+The spec's parallel length (0.7) and parallel halo (0.4) are not used: every EOL edge is checked,
+with or without metal beside it.
 
 1. Read the layout. Convert coordinates to integer nm, so there are no floating-point errors.
    Overlapping or touching rectangles on the same layer count as one piece of metal.
 2. Find every EOL edge: an end of the metal no longer than 0.6 um.
-3. Check both regions of every EOL edge: the parallel regions beside it and the EOL spacing
-   region in front of it.
-4. Report a violation only if both regions have metal: one for each metal inside the EOL
-   spacing region. Metal that only touches the border of the EOL spacing region is legal.
+3. Check the EOL spacing region in front of every EOL edge.
+4. Report a violation if the EOL spacing region has metal. Metal that only touches its border
+   is legal. Each EOL edge counts as one violation, seen from that edge: two line ends facing
+   each other are two violations; one end with several metals in front is one violation.
 
 A grid spatial index keeps every search local (1,000,000 rectangles take about 1.7 s).
 All four directions use the same code: the layout is rotated by 90 degrees each time.

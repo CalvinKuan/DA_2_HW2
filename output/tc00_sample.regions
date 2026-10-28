@@ -1,14 +1,14 @@
 number_of_eol_edges 12
-1 up  edge 10.400 1.800 11.000 1.800  side 10.000 1.100 10.400 1.800 yes  side 11.000 1.100 11.400 1.800 yes  front 10.000 1.800 11.400 2.800  applies yes  metal_in_front yes  violation yes
-1 right  edge 7.800 0.000 7.800 0.600  side 7.100 0.600 7.800 1.000 yes  side 7.100 -0.400 7.800 0.000 no  front 7.800 -0.400 8.800 1.000  applies yes  metal_in_front no  violation no
-1 right  edge 6.100 1.000 6.100 1.600  side 5.400 1.600 6.100 2.000 no  side 5.400 0.600 6.100 1.000 yes  front 6.100 0.600 7.100 2.000  applies yes  metal_in_front yes  violation yes
-1 right  edge 4.000 2.000 4.000 2.600  side 3.300 2.600 4.000 3.000 no  side 3.300 1.600 4.000 2.000 yes  front 4.000 1.600 5.000 3.000  applies yes  metal_in_front no  violation no
-1 right  edge 14.000 1.000 14.000 1.600  side 13.300 1.600 14.000 2.000 no  side 13.300 0.600 14.000 1.000 no  front 14.000 0.600 15.000 2.000  applies no  metal_in_front no  violation no
-1 right  edge 14.000 2.200 14.000 2.800  side 13.300 2.800 14.000 3.200 no  side 13.300 1.800 14.000 2.200 no  front 14.000 1.800 15.000 3.200  applies no  metal_in_front no  violation no
-1 down  edge 10.400 0.800 11.000 0.800  side 11.000 0.800 11.400 1.500 yes  side 10.000 0.800 10.400 1.500 yes  front 10.000 -0.200 11.400 0.800  applies yes  metal_in_front no  violation no
-1 left  edge 4.000 0.000 4.000 0.600  side 4.000 -0.400 4.700 0.000 no  side 4.000 0.600 4.700 1.000 yes  front 3.000 -0.400 4.000 1.000  applies yes  metal_in_front no  violation no
-1 left  edge 0.000 1.000 0.000 1.600  side 0.000 0.600 0.700 1.000 no  side 0.000 1.600 0.700 2.000 no  front -1.000 0.600 0.000 2.000  applies no  metal_in_front no  violation no
-1 left  edge 2.000 2.000 2.000 2.600  side 2.000 1.600 2.700 2.000 yes  side 2.000 2.600 2.700 3.000 no  front 1.000 1.600 2.000 3.000  applies yes  metal_in_front no  violation no
-1 left  edge 7.000 1.000 7.000 1.600  side 7.000 0.600 7.700 1.000 yes  side 7.000 1.600 7.700 2.000 no  front 6.000 0.600 7.000 2.000  applies yes  metal_in_front yes  violation yes
-1 left  edge 8.600 2.200 8.600 2.800  side 8.600 1.800 9.300 2.200 no  side 8.600 2.800 9.300 3.200 no  front 7.600 1.800 8.600 3.200  applies no  metal_in_front no  violation no
+1 up  edge 10.400 1.800 11.000 1.800  front 10.000 1.800 11.400 2.800  violation yes
+1 right  edge 7.800 0.000 7.800 0.600  front 7.800 -0.400 8.800 1.000  violation no
+1 right  edge 6.100 1.000 6.100 1.600  front 6.100 0.600 7.100 2.000  violation yes
+1 right  edge 4.000 2.000 4.000 2.600  front 4.000 1.600 5.000 3.000  violation no
+1 right  edge 14.000 1.000 14.000 1.600  front 14.000 0.600 15.000 2.000  violation no
+1 right  edge 14.000 2.200 14.000 2.800  front 14.000 1.800 15.000 3.200  violation no
+1 down  edge 10.400 0.800 11.000 0.800  front 10.000 -0.200 11.400 0.800  violation no
+1 left  edge 4.000 0.000 4.000 0.600  front 3.000 -0.400 4.000 1.000  violation no
+1 left  edge 0.000 1.000 0.000 1.600  front -1.000 0.600 0.000 2.000  violation no
+1 left  edge 2.000 2.000 2.000 2.600  front 1.000 1.600 2.000 3.000  violation no
+1 left  edge 7.000 1.000 7.000 1.600  front 6.000 0.600 7.000 2.000  violation yes
+1 left  edge 8.600 2.200 8.600 2.800  front 7.600 1.800 8.600 3.200  violation no
 end_of_eol_edges

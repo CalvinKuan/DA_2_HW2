@@ -22,16 +22,14 @@
 //         - its length xb - xa <= eolWidth, and
 //         - no rect covers it from above (otherwise it is not on the boundary,
 //           or one of its corners is concave).
-//    3. Parallel check: the rule applies only if some rect reaches into the
-//       side regions [xa - parSpace, xa) or (xb, xb + parSpace] while
-//       overlapping [Y - parWithin, Y].
-//    4. EOL spacing region (Fig. 2a), eolSpace deep and eolWithin wider on both sides:
+//    3. Every EOL edge is checked (the spec's parallel-edge condition is not used).
+//       EOL spacing region (Fig. 2a), eolSpace deep and eolWithin wider on both sides:
 //         [xa - eolWithin, xb + eolWithin] x [Y, Y + eolSpace].
-//       Every rect whose interior overlaps it violates; a rect only touching
-//       its border does not (spacing == eolSpace is legal). The marker is the
-//       part of the region between the edge level Y and the rect.
-//       The region is checked even when the rule does not apply (step 3), so
-//       such cases can be reported, but they are not violations.
+//       A rect whose interior overlaps it is too close; a rect only touching
+//       its border is not (spacing == eolSpace is legal). Each EOL edge with
+//       such rects is ONE violation, seen from that edge: two line ends facing
+//       each other are two violations. The marker is the part of the region
+//       between the edge level Y and the rects (their bounding box).
 // ============================================================================
 
 namespace {
@@ -157,55 +155,45 @@ void checkUpEdges(const std::vector<Shape>& shapes, const EolRule& rule, int lay
         });
         if (covered || !seen.emplace(Y, xa, xb).second) continue;
 
-        // 3. parallel edge: the query box already limits the distance to parSpace / parWithin,
-        //    so the shape only has to stick out beyond the left or right side of the edge
-        bool sideHit[2] = {false, false};
-        index.query(xa - rule.parSpace, Y - rule.parWithin, xb + rule.parSpace, Y, [&](const Shape& s) {
-            if (s.xl < xa) sideHit[0] = true;
-            if (s.xh > xb) sideHit[1] = true;
-        });
-        const bool parallel = sideHit[0] || sideHit[1];
-
-        // 4. EOL spacing region in front of the edge, eolWithin wider on both sides
+        // 3. EOL spacing region in front of the edge, eolWithin wider on both sides
         const Coord wl = xa - rule.eolWithin, wh = xb + rule.eolWithin, top = Y + rule.eolSpace;
-        const size_t before = out.size();
         bool frontHit = false;
         Coord frontSpacing = 0;
+        int nearestId = -1;
+        Box marker{wh, Y, wl, Y};  // grows to the bounding box of the parts of all shapes found
         index.query(wl, Y, wh, top, [&](const Shape& s) {
             // interiors must overlap; only touching the border is legal
             if (s.xh <= wl || s.xl >= wh || s.yh <= Y || s.yl >= top) return;
             const Coord spacing = std::max({Coord(0), s.yl - Y, s.xl - xb, xa - s.xh});
-            if (!frontHit || spacing < frontSpacing) frontSpacing = spacing;
+            if (!frontHit || spacing < frontSpacing) frontSpacing = spacing, nearestId = s.id;
             frontHit = true;
-            if (!parallel) return;  // checked, but the rule does not apply: not a violation
+            // in front: the gap up to the shape; beside the edge: the part of the shape inside
+            const Coord mTop = s.yl > Y ? s.yl : std::min(s.yh, top);
+            marker.xl = std::min(marker.xl, std::max(s.xl, wl));
+            marker.xh = std::max(marker.xh, std::min(s.xh, wh));
+            marker.yh = std::max(marker.yh, mTop);
+        });
 
+        // one violation per EOL edge, however many shapes are in front of it
+        if (frontHit) {
             Violation v;
             v.layer = layer;
             v.dir = kDir[k];
             v.eolEdge = rotateSegment({xa, Y, xb, Y}, back);
-            v.spacing = spacing;
-            // in front: the gap up to the shape; beside the edge: the part of the shape inside
-            const Coord mTop = s.yl > Y ? s.yl : std::min(s.yh, top);
-            v.marker = rotateBox({std::max(s.xl, wl), Y, std::min(s.xh, wh), mTop}, back);
+            v.spacing = frontSpacing;
+            v.marker = rotateBox(marker, back);
             v.eolRectId = r.id;
-            v.otherRectId = s.id;
+            v.otherRectId = nearestId;
             out.push_back(v);
-        });
+        }
 
         if (checks) {
             EolCheck c;
             c.layer = layer;
             c.dir = kDir[k];
             c.eolEdge = rotateSegment({xa, Y, xb, Y}, back);
-            c.side[0] = rotateBox({xa - rule.parSpace, Y - rule.parWithin, xa, Y}, back);
-            c.side[1] = rotateBox({xb, Y - rule.parWithin, xb + rule.parSpace, Y}, back);
-            c.sideHit[0] = sideHit[0];
-            c.sideHit[1] = sideHit[1];
             c.front = rotateBox({wl, Y, wh, top}, back);
-            c.applies = parallel;
-            c.frontHit = frontHit;
-            c.frontSpacing = frontSpacing;
-            c.violated = out.size() > before;
+            c.violated = frontHit;
             checks->push_back(c);
         }
     }

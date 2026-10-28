@@ -4,9 +4,8 @@
 Usage: python3 scripts/plot_layout.py <layout_file> -o <picture.png>
                                       [-r <result_file>] [-c <regions_file>] [-t <title>]
   -r  result file (./eol_drc output): violations are drawn in red as V1, V2, ...
-  -c  regions file (./eol_drc --regions output): for every EOL edge, the edge itself,
-      the two parallel regions (filled when a shape was found there) and the EOL
-      spacing region in front of the edge (EOLSpacing deep, EOLWithin wider on each side)
+  -c  regions file (./eol_drc --regions output): for every EOL edge, the edge itself and
+      the EOL spacing region in front of it (EOLSpacing deep, EOLWithin wider on each side)
 The output format follows the extension of -o (.png / .svg / .pdf).
 Rectangles are labelled #1, #2, ... in input order.
 """
@@ -24,7 +23,6 @@ from matplotlib.ticker import MultipleLocator  # noqa: E402
 
 COLORS = ["#4472c4", "#70ad47", "#ed7d31", "#7030a0", "#00a0c0", "#bf9000"]
 EDGE_COLOR = "#ff8c00"
-SIDE_COLOR = "#2e9e44"
 FRONT_COLOR = "#8e44ad"
 MAX_LABELLED_RECTS = 80
 MAX_LABELLED_MARKS = 40
@@ -63,22 +61,17 @@ def read_result(path):
 
 
 def read_checks(path):
-    """Lines: <layer> <dir> edge x1 y1 x2 y2 side xl yl xh yh <hit> side ... <hit>
-    front xl yl xh yh applies <yes|no> metal_in_front <yes|no> violation <yes|no>"""
+    """Lines: <layer> <dir> edge x1 y1 x2 y2 front xl yl xh yh violation <yes|no>"""
     checks = []
     for line in open(path):
         t = line.split()
-        if len(t) < 28 or t[2] != "edge":
+        if len(t) < 14 or t[2] != "edge" or t[7] != "front":
             continue
         box = lambda k: tuple(float(v) for v in t[k:k + 4])  # noqa: E731
-        flags = dict(zip(t[24::2], t[25::2]))
         checks.append({
             "edge": box(3),
-            "sides": [(box(8), t[12] == "yes"), (box(14), t[18] == "yes")],
-            "front": box(20),
-            "applies": flags.get("applies") == "yes",
-            "front_hit": flags.get("metal_in_front") == "yes",
-            "violated": flags.get("violation") == "yes",
+            "front": box(8),
+            "violated": t[13] == "yes",
         })
     return checks
 
@@ -104,11 +97,6 @@ def tick_step(span):
 
 def draw_checks(ax, checks):
     for c in checks:
-        for (a, b, cc, d), hit in c["sides"]:
-            ax.add_patch(Rectangle((a, b), cc - a, d - b, fill=hit, facecolor=SIDE_COLOR,
-                                   alpha=0.25 if hit else 1.0, edgecolor="none", zorder=3))
-            ax.add_patch(Rectangle((a, b), cc - a, d - b, fill=False, edgecolor=SIDE_COLOR,
-                                   linewidth=1.0, linestyle="--", zorder=3))
         a, b, cc, d = c["front"]
         ax.add_patch(Rectangle((a, b), cc - a, d - b, facecolor=FRONT_COLOR, alpha=0.08,
                                edgecolor="none", zorder=3))
@@ -139,9 +127,9 @@ def main():
     xs = [v for r in rects for v in (r[1], r[3])] or [0.0, 1.0]
     ys = [v for r in rects for v in (r[2], r[4])] or [0.0, 1.0]
     for c in checks or []:
-        for (a, b, cc, d) in [c["front"]] + [s for s, _ in c["sides"]]:
-            xs += [a, cc]
-            ys += [b, d]
+        a, b, cc, d = c["front"]
+        xs += [a, cc]
+        ys += [b, d]
     pad = 0.04 * max(max(xs) - min(xs), max(ys) - min(ys)) + 0.4
     x0, x1, y0, y1 = min(xs) - pad, max(xs) + pad, min(ys) - pad, max(ys) + pad
 
@@ -176,10 +164,6 @@ def main():
         draw_checks(ax, checks)
         legend += [
             Line2D([], [], color=EDGE_COLOR, linewidth=3.5, label="EOL edge (length <= 0.6)"),
-            Patch(facecolor="none", edgecolor=SIDE_COLOR, linestyle="--",
-                  label="parallel region 0.4 x 0.7 (checked)"),
-            Patch(facecolor=SIDE_COLOR, alpha=0.35, edgecolor=SIDE_COLOR, linestyle="--",
-                  label="parallel region, metal found"),
             Patch(facecolor=FRONT_COLOR, alpha=0.15, edgecolor=FRONT_COLOR, linestyle="--",
                   label="EOL spacing region (checked)\nEOLSpacing 1.0, EOLWithin 0.4"),
         ]

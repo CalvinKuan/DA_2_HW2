@@ -1,9 +1,8 @@
 Layers: 1, rectangles: 14
-EOL violations: 2 (checkEOL returned 2 before dedup)
-  #1 layer 1: EOL edge (33.000, 4.000)-(33.600, 4.000) facing up, spacing 0.500 um, marker (32.600, 4.000)-(34.000, 4.500), eol rect #9, other rect #10
-  #2 layer 1: EOL edge (43.000, 4.000)-(43.600, 4.000) facing up, spacing 0.500 um, marker (42.600, 4.000)-(44.000, 4.500), eol rect #12, other rect #13
-Metal too close in front but nothing beside the end (not a violation): 3
-  layer 1: EOL edge (3.000, 4.000)-(3.600, 4.000) facing up, spacing 0.500 um
-  layer 1: EOL edge (13.000, 4.000)-(13.600, 4.000) facing up, spacing 0.500 um
-  layer 1: EOL edge (23.000, 4.000)-(23.600, 4.000) facing up, spacing 0.500 um
-Parse time: 0.180458 ms, check time: 0.011833 ms
+EOL violations: 5
+  #1 layer 1: EOL edge (3.000, 4.000)-(3.600, 4.000) facing up, spacing 0.500 um, marker (2.600, 4.000)-(4.000, 4.500), eol rect #1, other rect #2
+  #2 layer 1: EOL edge (13.000, 4.000)-(13.600, 4.000) facing up, spacing 0.500 um, marker (12.600, 4.000)-(14.000, 4.500), eol rect #3, other rect #4
+  #3 layer 1: EOL edge (23.000, 4.000)-(23.600, 4.000) facing up, spacing 0.500 um, marker (22.600, 4.000)-(24.000, 4.500), eol rect #6, other rect #7
+  #4 layer 1: EOL edge (33.000, 4.000)-(33.600, 4.000) facing up, spacing 0.500 um, marker (32.600, 4.000)-(34.000, 4.500), eol rect #9, other rect #10
+  #5 layer 1: EOL edge (43.000, 4.000)-(43.600, 4.000) facing up, spacing 0.500 um, marker (42.600, 4.000)-(44.000, 4.500), eol rect #12, other rect #13
+Parse time: 0.031833 ms, check time: 0.010625 ms

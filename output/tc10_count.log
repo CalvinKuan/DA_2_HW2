@@ -1,0 +1,8 @@
+Layers: 1, rectangles: 11
+EOL violations: 5
+  #1 layer 1: EOL edge (3.000, 4.000)-(3.600, 4.000) facing up, spacing 0.500 um, marker (2.600, 4.000)-(4.000, 4.800), eol rect #1, other rect #3
+  #2 layer 1: EOL edge (14.000, 1.000)-(14.000, 1.600) facing right, spacing 0.500 um, marker (14.000, 1.400)-(14.500, 2.000), eol rect #5, other rect #6
+  #3 layer 1: EOL edge (24.000, 1.000)-(24.000, 1.600) facing right, spacing 0.500 um, marker (24.000, 1.000)-(24.500, 1.600), eol rect #9, other rect #10
+  #4 layer 1: EOL edge (14.500, 1.400)-(14.500, 2.000) facing left, spacing 0.500 um, marker (14.000, 1.000)-(14.500, 1.600), eol rect #6, other rect #5
+  #5 layer 1: EOL edge (24.500, 1.000)-(24.500, 1.600) facing left, spacing 0.500 um, marker (24.000, 1.000)-(24.500, 1.600), eol rect #10, other rect #9
+Parse time: 0.025792 ms, check time: 0.009333 ms
