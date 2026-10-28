@@ -1,0 +1,40 @@
+// ============================================================================
+//  EOL spacing rule deck for Calibre nmDRC  --  DRAFT
+//  Not run on a real Calibre yet: check the syntax against the SVRF manual
+//  (svrf_ur.pdf) on the server.
+//
+//  Same rule as the C++ checker:
+//    EOL edge   : edge <= 0.6 with convex corners at both ends
+//    applies if : some metal within 0.4 beside the end, within 0.7 back from it
+//    violation  : metal in the EOL spacing region: EOLSpacing 1.0 in front of
+//                 the end, EOLWithin 0.4 wider on each side
+// ============================================================================
+
+LAYOUT PATH    "tc00_sample.gds"
+LAYOUT PRIMARY "TOP"
+LAYOUT SYSTEM  GDSII
+PRECISION      1000
+
+DRC RESULTS DATABASE "eol_results.db" ASCII
+DRC SUMMARY REPORT   "eol_summary.rep"
+DRC MAXIMUM RESULTS  ALL
+
+LAYER M1 1
+
+// 1. line ends: edges of M1 no longer than 0.6 whose both corners are convex
+EOL_EDGE = CONVEX EDGE M1 ANGLE1 == 90 ANGLE2 == 90 WITH LENGTH <= 0.6
+
+// 2. parallel condition: a 0.4 x 0.7 region beside each side of the line end.
+//    0.401 instead of 0.4, so metal exactly 0.4 away (only touching) still counts.
+END_BOX  = EXPAND EDGE EOL_EDGE INSIDE BY 0.7 EXTEND BY 0.401  // end strip + both side regions
+END_SELF = EXPAND EDGE EOL_EDGE INSIDE BY 0.7                  // the wire's own end strip
+SIDE_BOX = END_BOX NOT END_SELF                                // the two side regions only
+PAR_OK   = END_BOX INTERACT (SIDE_BOX AND M1)                  // metal found beside the end
+EOL_PAR  = EOL_EDGE COINCIDENT EDGE PAR_OK                     // line ends where the rule applies
+
+// 3. violation: metal closer than 1.0 in front of the line end,
+//    the measured region 0.4 wider on each side
+M1.EOL.1 {
+  @ M1 end-of-line spacing < 1.0 um (end <= 0.6, parallel 0.4 within 0.7, eolWithin 0.4)
+  EXT EOL_PAR M1 < 1.0 OPPOSITE EXTENDED 0.4 REGION
+}

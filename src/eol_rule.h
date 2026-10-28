@@ -8,7 +8,7 @@ struct EolRule {
     Coord eolWidth = 600;   // length of end: an edge is an EOL edge if its length <= 0.6 um
     Coord parWithin = 700;  // parallel length: measured back from the EOL edge along its sides, 0.7 um
     Coord parSpace = 400;   // parallel halo: distance away from the sides, 0.4 um
-    Coord eolWithin = 400;  // "halo" (eolWithin in Fig. 2a): the violation region in front of the
-                            // EOL edge is this much wider on both sides (a T shape). The spec gives
+    Coord eolWithin = 400;  // EOLWithin ("halo" in the spec's figure): the EOL spacing region in
+                            // front of the EOL edge is this much wider on both sides. The spec gives
                             // no value; 0.4 um is assumed, as wide as the halo in the spec's figure
 };

@@ -2,4 +2,5 @@ Layers: 1, rectangles: 13
 EOL violations: 2 (checkEOL returned 2 before dedup)
   #1 layer 1: EOL edge (6.000, 2.000)-(6.000, 2.600) facing right, spacing 0.500 um, marker (6.000, 2.000)-(6.500, 3.000), eol rect #3, other rect #5
   #2 layer 1: EOL edge (24.000, 2.000)-(24.000, 2.600) facing right, spacing 0.500 um, marker (24.000, 1.600)-(24.500, 3.000), eol rect #10, other rect #13
-Parse time: 0.187791 ms, check time: 0.009875 ms
+Metal too close in front but nothing beside the end (not a violation): 0
+Parse time: 0.1875 ms, check time: 0.011125 ms

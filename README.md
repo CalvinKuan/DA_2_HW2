@@ -40,8 +40,9 @@ Output with the regions the checker looked at:
 ![tc07 output](docs/tc07_output.png)
 
 - **Orange line**: EOL edge.
-- **Green box**: parallel region. Filled means a shape was found there, so the rule applies.
-- **Purple box**: T-shaped violation region.
+- **Green box**: parallel region (checked). Filled means metal was found there.
+- **Purple box**: EOL spacing region in front of the edge (checked): EOLSpacing 1.0 deep,
+  EOLWithin 0.4 wider on each side.
 - **Red box**: violation.
 
 ## How it works
@@ -53,15 +54,16 @@ Rule parameters (`src/eol_rule.h`):
 | EOL edge length (length of end) | <= 0.6 um |
 | Parallel length | 0.7 um |
 | Parallel halo | 0.4 um |
-| EOL spacing (depth of the violation region) | 1.0 um |
-| eolWithin ("halo"), extra width on each side of the violation region | 0.4 um (assumed; no value in the spec) |
+| EOLSpacing: depth of the EOL spacing region | 1.0 um |
+| EOLWithin ("halo"): extra width of the EOL spacing region on each side | 0.4 um (assumed; no value in the spec) |
 
 1. Read the layout. Convert coordinates to integer nm, so there are no floating-point errors.
    Overlapping or touching rectangles on the same layer count as one piece of metal.
 2. Find every EOL edge: an end of the metal no longer than 0.6 um.
-3. Apply the rule to an edge only if some metal is in a parallel region beside it.
-4. Report every metal that overlaps the T-shaped region in front of the edge. Touching its
-   border is legal.
+3. Check both regions of every EOL edge: the parallel regions beside it and the EOL spacing
+   region in front of it.
+4. Report a violation only if both regions have metal: one for each metal inside the EOL
+   spacing region. Metal that only touches the border of the EOL spacing region is legal.
 
 A grid spatial index keeps every search local (1,000,000 rectangles take about 1.7 s).
 All four directions use the same code: the layout is rotated by 90 degrees each time.

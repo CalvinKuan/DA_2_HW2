@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
 
     EolRule rule;
     std::vector<EolCheck> checks;
-    std::vector<Violation> violations = checkEOL(layout, rule, regionsPath.empty() ? nullptr : &checks);
+    std::vector<Violation> violations = checkEOL(layout, rule, &checks);
     auto t2 = std::chrono::steady_clock::now();
 
     if (!regionsPath.empty()) {
@@ -79,6 +79,7 @@ int main(int argc, char** argv) {
         std::cout << "EOL violations: " << written << " (checkEOL returned " << violations.size()
                   << " before dedup)\n";
         printDetails(std::cout, violations);
+        printNotApplied(std::cout, checks);
         std::cout << "Parse time: " << ms(t0, t1) << " ms, check time: " << ms(t1, t2) << " ms\n";
     } else {
         writeViolations(std::cout, violations);

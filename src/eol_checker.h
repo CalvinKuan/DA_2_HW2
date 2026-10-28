@@ -33,10 +33,12 @@ struct EolCheck {
     Dir dir = Dir::Up;
     Box side[2];                       // parallel regions beside the edge (parSpace x parWithin)
     bool sideHit[2] = {false, false};  // a shape was found in side[i]
-    Box front;                         // T-shaped violation region in front of the edge
+    Box front;                         // EOL spacing region in front of the edge
                                        // ((edge length + 2 * eolWithin) x eolSpace)
-    bool applies = false;              // parallel condition holds, so the front window was checked
-    bool violated = false;             // a shape was found in the front window
+    bool applies = false;              // parallel condition holds, so the rule applies
+    bool frontHit = false;             // a shape was found in the front region (checked either way)
+    Coord frontSpacing = 0;            // smallest spacing to such a shape
+    bool violated = false;             // applies && frontHit
 };
 
 // Checks the EOL rule on every layer and returns all violations.

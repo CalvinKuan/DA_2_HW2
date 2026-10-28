@@ -3,4 +3,5 @@ EOL violations: 3 (checkEOL returned 3 before dedup)
   #1 layer 1: EOL edge (13.000, 4.000)-(13.600, 4.000) facing up, spacing 0.900 um, marker (12.600, 4.000)-(14.000, 4.900), eol rect #4, other rect #5
   #2 layer 1: EOL edge (33.000, 4.000)-(33.400, 4.000) facing up, spacing 0.200 um, marker (32.600, 4.000)-(33.800, 4.200), eol rect #10, other rect #11
   #3 layer 1: EOL edge (53.000, 4.000)-(53.600, 4.000) facing up, spacing 0.500 um, marker (53.300, 4.000)-(54.000, 4.500), eol rect #16, other rect #17
-Parse time: 0.213208 ms, check time: 0.011667 ms
+Metal too close in front but nothing beside the end (not a violation): 0
+Parse time: 0.204209 ms, check time: 0.01375 ms
