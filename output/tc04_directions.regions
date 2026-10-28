@@ -1,0 +1,10 @@
+number_of_eol_edges 8
+1 up  edge 3.000 4.000 3.600 4.000  side 2.600 3.300 3.000 4.000 no  side 3.600 3.300 4.000 4.000 yes  front 2.600 4.000 4.000 5.000  applies yes  violation yes
+1 up  edge 13.000 10.000 13.600 10.000  side 12.600 9.300 13.000 10.000 yes  side 13.600 9.300 14.000 10.000 no  front 12.600 10.000 14.000 11.000  applies yes  violation no
+1 right  edge 27.000 2.000 27.000 2.500  side 26.300 2.500 27.000 2.900 yes  side 26.300 1.600 27.000 2.000 no  front 27.000 1.600 28.000 2.900  applies yes  violation yes
+1 right  edge 39.000 2.000 39.000 2.600  side 38.300 2.600 39.000 3.000 no  side 38.300 1.600 39.000 2.000 yes  front 39.000 1.600 40.000 3.000  applies yes  violation no
+1 down  edge 3.000 0.000 3.600 0.000  side 3.600 0.000 4.000 0.700 yes  side 2.600 0.000 3.000 0.700 no  front 2.600 -1.000 4.000 0.000  applies yes  violation no
+1 down  edge 13.000 6.000 13.600 6.000  side 13.600 6.000 14.000 6.700 no  side 12.600 6.000 13.000 6.700 yes  front 12.600 5.000 14.000 6.000  applies yes  violation yes
+1 left  edge 23.000 2.000 23.000 2.500  side 23.000 1.600 23.700 2.000 no  side 23.000 2.500 23.700 2.900 yes  front 22.000 1.600 23.000 2.900  applies yes  violation no
+1 left  edge 35.000 2.000 35.000 2.600  side 35.000 1.600 35.700 2.000 yes  side 35.000 2.600 35.700 3.000 no  front 34.000 1.600 35.000 3.000  applies yes  violation yes
+end_of_eol_edges
