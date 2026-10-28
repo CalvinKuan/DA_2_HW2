@@ -1,8 +1,10 @@
-Layers: 1, rectangles: 11
-EOL violations: 5
-  #1 layer 1: EOL edge (3.000, 4.000)-(3.600, 4.000) facing up, spacing 0.500 um, marker (2.600, 4.000)-(4.000, 4.800), eol rect #1, other rect #3
-  #2 layer 1: EOL edge (14.000, 1.000)-(14.000, 1.600) facing right, spacing 0.500 um, marker (14.000, 1.400)-(14.500, 2.000), eol rect #5, other rect #6
-  #3 layer 1: EOL edge (24.000, 1.000)-(24.000, 1.600) facing right, spacing 0.500 um, marker (24.000, 1.000)-(24.500, 1.600), eol rect #9, other rect #10
-  #4 layer 1: EOL edge (14.500, 1.400)-(14.500, 2.000) facing left, spacing 0.500 um, marker (14.000, 1.000)-(14.500, 1.600), eol rect #6, other rect #5
-  #5 layer 1: EOL edge (24.500, 1.000)-(24.500, 1.600) facing left, spacing 0.500 um, marker (24.000, 1.000)-(24.500, 1.600), eol rect #10, other rect #9
-Parse time: 0.025792 ms, check time: 0.009333 ms
+Layers: 1, rectangles: 14
+EOL violations: 7
+  #1 layer 1: EOL edge (3.000, 4.000)-(3.600, 4.000) facing up, spacing 0.500 um, marker (2.600, 4.000)-(3.300, 4.500), eol rect #1, other rect #3
+  #2 layer 1: EOL edge (3.000, 4.000)-(3.600, 4.000) facing up, spacing 0.800 um, marker (3.400, 4.000)-(4.000, 4.800), eol rect #1, other rect #4
+  #3 layer 1: EOL edge (33.000, 4.000)-(33.600, 4.000) facing up, spacing 0.500 um, marker (32.600, 4.000)-(34.000, 4.700), eol rect #12, other rect #13
+  #4 layer 1: EOL edge (14.000, 1.000)-(14.000, 1.600) facing right, spacing 0.500 um, marker (14.000, 1.400)-(14.500, 2.000), eol rect #5, other rect #6
+  #5 layer 1: EOL edge (24.000, 1.000)-(24.000, 1.600) facing right, spacing 0.500 um, marker (24.000, 1.000)-(24.500, 1.600), eol rect #9, other rect #10
+  #6 layer 1: EOL edge (14.500, 1.400)-(14.500, 2.000) facing left, spacing 0.500 um, marker (14.000, 1.000)-(14.500, 1.600), eol rect #6, other rect #5
+  #7 layer 1: EOL edge (24.500, 1.000)-(24.500, 1.600) facing left, spacing 0.500 um, marker (24.000, 1.000)-(24.500, 1.600), eol rect #10, other rect #9
+Parse time: 0.028875 ms, check time: 0.014958 ms

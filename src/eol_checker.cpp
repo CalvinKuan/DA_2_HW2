@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <map>
 #include <set>
 #include <tuple>
 
@@ -26,10 +27,12 @@
 //       EOL spacing region (Fig. 2a), eolSpace deep and eolWithin wider on both sides:
 //         [xa - eolWithin, xb + eolWithin] x [Y, Y + eolSpace].
 //       A rect whose interior overlaps it is too close; a rect only touching
-//       its border is not (spacing == eolSpace is legal). Each EOL edge with
-//       such rects is ONE violation, seen from that edge: two line ends facing
-//       each other are two violations. The marker is the part of the region
-//       between the edge level Y and the rects (their bounding box).
+//       its border is not (spacing == eolSpace is legal). Seen from the EOL
+//       edge, every piece of metal that is too close is ONE violation (rects
+//       that overlap or touch are one piece of metal, labelled beforehand with
+//       union-find): two line ends facing each other are two violations. The
+//       marker is the part of the region between the edge level Y and that
+//       metal (the bounding box of the parts of its rects).
 // ============================================================================
 
 namespace {
@@ -120,10 +123,43 @@ private:
     std::vector<std::vector<int>> cells_;
 };
 
+int findRoot(std::vector<int>& parent, int i) {
+    while (parent[i] != i) i = parent[i] = parent[parent[i]];
+    return i;
+}
+
+// Labels the rects of one layer by piece of metal: rects that overlap or share a piece
+// of boundary are the same metal (union-find). metal[rect id] = id of its piece of metal.
+void labelMetal(const std::vector<Rect>& rects, std::vector<int>& metal) {
+    std::vector<Shape> shapes;
+    shapes.reserve(rects.size());
+    for (const Rect& r : rects) {
+        shapes.push_back({r.xl, r.yl, r.xh, r.yh, r.id});
+        metal[r.id] = r.id;
+    }
+    GridIndex index(shapes);
+    for (const Shape& s : shapes) {
+        index.query(s.xl, s.yl, s.xh, s.yh, [&](const Shape& t) {
+            // the query only returns touching rects; touching at a single corner does not count
+            if (std::min(s.xh, t.xh) > std::max(s.xl, t.xl) || std::min(s.yh, t.yh) > std::max(s.yl, t.yl))
+                metal[findRoot(metal, s.id)] = findRoot(metal, t.id);
+        });
+    }
+    for (const Rect& r : rects) metal[r.id] = findRoot(metal, r.id);
+}
+
+// The part of one piece of metal inside the EOL spacing region of an edge.
+struct Hit {
+    Box marker;     // bounding box of the parts of its rects
+    Coord spacing;  // smallest spacing to its rects
+    int rectId;     // the nearest of its rects
+};
+
 // Checks all EOL edges facing up (+y) among `shapes` (all on one layer).
 // `k` is the rotation applied to the shapes; results are rotated back.
 void checkUpEdges(const std::vector<Shape>& shapes, const EolRule& rule, int layer, int k,
-                  std::vector<Violation>& out, std::vector<EolCheck>* checks) {
+                  const std::vector<int>& metal, std::vector<Violation>& out,
+                  std::vector<EolCheck>* checks) {
     static const Dir kDir[4] = {Dir::Up, Dir::Right, Dir::Down, Dir::Left};
     const int back = (4 - k) % 4;
 
@@ -157,33 +193,34 @@ void checkUpEdges(const std::vector<Shape>& shapes, const EolRule& rule, int lay
 
         // 3. EOL spacing region in front of the edge, eolWithin wider on both sides
         const Coord wl = xa - rule.eolWithin, wh = xb + rule.eolWithin, top = Y + rule.eolSpace;
-        bool frontHit = false;
-        Coord frontSpacing = 0;
-        int nearestId = -1;
-        Box marker{wh, Y, wl, Y};  // grows to the bounding box of the parts of all shapes found
+        std::map<int, Hit> hits;  // piece of metal -> its part inside the region
         index.query(wl, Y, wh, top, [&](const Shape& s) {
             // interiors must overlap; only touching the border is legal
             if (s.xh <= wl || s.xl >= wh || s.yh <= Y || s.yl >= top) return;
             const Coord spacing = std::max({Coord(0), s.yl - Y, s.xl - xb, xa - s.xh});
-            if (!frontHit || spacing < frontSpacing) frontSpacing = spacing, nearestId = s.id;
-            frontHit = true;
             // in front: the gap up to the shape; beside the edge: the part of the shape inside
             const Coord mTop = s.yl > Y ? s.yl : std::min(s.yh, top);
-            marker.xl = std::min(marker.xl, std::max(s.xl, wl));
-            marker.xh = std::max(marker.xh, std::min(s.xh, wh));
-            marker.yh = std::max(marker.yh, mTop);
+            const Box part{std::max(s.xl, wl), Y, std::min(s.xh, wh), mTop};
+            auto [it, fresh] = hits.try_emplace(metal[s.id], Hit{part, spacing, s.id});
+            if (fresh) return;
+            // another rect of the same piece of metal: grow to the bounding box
+            Hit& h = it->second;
+            h.marker.xl = std::min(h.marker.xl, part.xl);
+            h.marker.xh = std::max(h.marker.xh, part.xh);
+            h.marker.yh = std::max(h.marker.yh, part.yh);
+            if (spacing < h.spacing) h.spacing = spacing, h.rectId = s.id;
         });
 
-        // one violation per EOL edge, however many shapes are in front of it
-        if (frontHit) {
+        // seen from this EOL edge: one violation for every piece of metal in the region
+        for (const auto& [m, h] : hits) {
             Violation v;
             v.layer = layer;
             v.dir = kDir[k];
             v.eolEdge = rotateSegment({xa, Y, xb, Y}, back);
-            v.spacing = frontSpacing;
-            v.marker = rotateBox(marker, back);
+            v.spacing = h.spacing;
+            v.marker = rotateBox(h.marker, back);
             v.eolRectId = r.id;
-            v.otherRectId = nearestId;
+            v.otherRectId = h.rectId;
             out.push_back(v);
         }
 
@@ -193,7 +230,7 @@ void checkUpEdges(const std::vector<Shape>& shapes, const EolRule& rule, int lay
             c.dir = kDir[k];
             c.eolEdge = rotateSegment({xa, Y, xb, Y}, back);
             c.front = rotateBox({wl, Y, wh, top}, back);
-            c.violated = frontHit;
+            c.violated = !hits.empty();
             checks->push_back(c);
         }
     }
@@ -204,12 +241,14 @@ void checkUpEdges(const std::vector<Shape>& shapes, const EolRule& rule, int lay
 std::vector<Violation> checkEOL(const Layout& layout, const EolRule& rule,
                                 std::vector<EolCheck>* checks) {
     std::vector<Violation> violations;
+    std::vector<int> metal(layout.rects.size());
     for (const auto& [layer, rects] : layout.rectsByLayer()) {
+        labelMetal(rects, metal);
         for (int k = 0; k < 4; ++k) {
             std::vector<Shape> shapes;
             shapes.reserve(rects.size());
             for (const Rect& r : rects) shapes.push_back(rotate({r.xl, r.yl, r.xh, r.yh, r.id}, k));
-            checkUpEdges(shapes, rule, layer, k, violations, checks);
+            checkUpEdges(shapes, rule, layer, k, metal, violations, checks);
         }
     }
     return violations;

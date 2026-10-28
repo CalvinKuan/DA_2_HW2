@@ -66,10 +66,11 @@ with or without metal beside it.
 2. Find every EOL edge: an end of the metal no longer than 0.6 um.
 3. Check the EOL spacing region in front of every EOL edge.
 4. Report a violation if the EOL spacing region has metal. Metal that only touches its border
-   is legal. Each EOL edge counts as one violation, seen from that edge: two line ends facing
-   each other are two violations; one end with several metals in front is one violation.
+   is legal. Violations are counted as seen from each EOL edge: one for every piece of metal
+   in its EOL spacing region (touching or overlapping rectangles are one piece of metal).
+   Two line ends facing each other are two violations.
 
-A grid spatial index keeps every search local (1,000,000 rectangles take about 1.7 s).
+A grid spatial index keeps every search local (1,000,000 rectangles take about 2 s).
 All four directions use the same code: the layout is rotated by 90 degrees each time.
 
 ## Directory

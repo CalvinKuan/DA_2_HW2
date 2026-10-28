@@ -4,4 +4,4 @@ EOL violations: 4
   #2 layer 1: EOL edge (27.000, 2.000)-(27.000, 2.500) facing right, spacing 0.700 um, marker (27.000, 1.600)-(27.700, 2.900), eol rect #7, other rect #8
   #3 layer 1: EOL edge (13.000, 6.000)-(13.600, 6.000) facing down, spacing 0.200 um, marker (12.600, 5.800)-(14.000, 6.000), eol rect #4, other rect #5
   #4 layer 1: EOL edge (35.000, 2.000)-(35.000, 2.600) facing left, spacing 0.400 um, marker (34.600, 1.600)-(35.000, 3.000), eol rect #10, other rect #11
-Parse time: 0.026333 ms, check time: 0.00725 ms
+Parse time: 0.119875 ms, check time: 0.0095 ms

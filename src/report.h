@@ -6,7 +6,7 @@
 #include "eol_checker.h"
 #include "layout.h"
 
-// Writes the violation markers in the result format (one per violated EOL edge, sorted):
+// Writes the violation markers in the result format (sorted):
 //   number_of_violations <k>
 //   <layer>  <xl> <yl>,  <xh> <yh>     (unit = um, 3 decimals)
 //   end_of_violation
