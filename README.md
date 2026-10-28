@@ -83,5 +83,5 @@ All four directions use the same code: the layout is rotated by 90 degrees each 
 │   ├── figures/          pictures of every testcase
 │   └── README.md         what each testcase checks
 ├── scripts/              test runner and drawing scripts
-└── docs/                 pictures used in this README
+└── docs/                 pictures (README examples, flowchart, result on the spec's layout)
 ```
